@@ -1,4 +1,6 @@
 import pygame
+import math
+from boat import Boat
 from boat_input import BoatInputState, update_input
 
 def main():
@@ -9,6 +11,7 @@ def main():
     font = pygame.font.SysFont(None, 28)
 
     input_state = BoatInputState()
+    boat = Boat(x=640, y=360)
 
     running = True
     while running:
@@ -33,10 +36,28 @@ def main():
             dt=dt,
         )
 
+        boat.update(
+            throttle=input_state.throttle,
+            brake=input_state.brake,
+            steer=input_state.steer,
+            dt=dt,
+        )
+
         screen.fill((20, 20, 25))
-        debug = f"throttle={input_state.throttle:.2f} brake={input_state.brake:.2f} steer={input_state.steer:.2f}"
+        debug = f"x={boat.x:.1f} y={boat.y:.1f} speed={boat.speed:.1f} throttle={input_state.throttle:.2f} steer={input_state.steer:.2f}"
         text = font.render(debug, True, (230, 230, 230))
         screen.blit(text, (20, 20))
+
+        # Draw boat as a rotated triangle
+        cx, cy = boat.x, boat.y
+        a = boat.angle
+        size = 18
+
+        p1 = (cx + math.cos(a) * size * 1.6, cy + math.sin(a) * size * 1.6)
+        p2 = (cx + math.cos(a + 2.5) * size, cy + math.sin(a + 2.5) * size)
+        p3 = (cx + math.cos(a - 2.5) * size, cy + math.sin(a - 2.5) * size)
+
+        pygame.draw.polygon(screen, (80, 170, 255), [p1, p2, p3])
 
         pygame.display.flip()
 
