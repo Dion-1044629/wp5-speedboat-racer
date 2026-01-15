@@ -6,6 +6,7 @@ from boat_input import BoatInputState, update_input
 def main():
     pygame.init()
     screen = pygame.display.set_mode((1280, 720))
+    WORLD_W, WORLD_H = 4000, 3000
     pygame.display.set_caption("WP5 Speedboat Racer")
     clock = pygame.time.Clock()
     font = pygame.font.SysFont(None, 28)
@@ -43,13 +44,31 @@ def main():
             dt=dt,
         )
 
+        boat.x = max(0, min(WORLD_W, boat.x))
+        boat.y = max(0, min(WORLD_H, boat.y))
+
         screen.fill((20, 20, 25))
-        debug = f"x={boat.x:.1f} y={boat.y:.1f} speed={boat.speed:.1f} throttle={input_state.throttle:.2f} steer={input_state.steer:.2f}"
+
+        cam_x = boat.x - 1280 / 2
+        cam_y = boat.y - 720 / 2
+        
+        # World grid
+        grid = 200
+        for x in range(0, WORLD_W + 1, grid):
+            sx = x - cam_x
+            if 0 <= sx <= 1280:
+                pygame.draw.line(screen, (35, 35, 45), (sx, -cam_y), (sx, WORLD_H - cam_y))
+        for y in range(0, WORLD_H + 1, grid):
+            sy = y - cam_y
+            if 0 <= sy <= 720:
+                pygame.draw.line(screen, (35, 35, 45), (-cam_x, sy), (WORLD_W - cam_x, sy))
+
+        debug = f"world=({boat.x:.0f},{boat.y:.0f}) speed={boat.speed:.0f} throttle={input_state.throttle:.2f} steer={input_state.steer:.2f}"
         text = font.render(debug, True, (230, 230, 230))
         screen.blit(text, (20, 20))
 
         # Draw boat as a rotated triangle
-        cx, cy = boat.x, boat.y
+        cx, cy = boat.x - cam_x, boat.y - cam_y
         a = boat.angle
         size = 18
 
