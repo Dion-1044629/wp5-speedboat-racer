@@ -11,7 +11,8 @@ Top-down racing game (“Speedboat Racer”) met timer, positie-indicator en 4 A
 - (Optioneel) Reset: R
 
 ## Installatie & Run
-**Vereisten:** TBD (bijv. Python 3.11 / Java / Unity / etc.)
+De exacte installatie- en run-stappen worden toegevoegd zodra de gebruikte taal/engine definitief is.
+Voor nu geldt: open het project in de gekozen ontwikkelomgeving en start de applicatie vanuit `src/`.
 
 1) Clone:
 ```bash
