@@ -1,4 +1,5 @@
 import pygame
+DEBUG = False
 import math
 from bot_ai import bot_decide
 from track import Checkpoint, Track, RacerProgress, update_progress
@@ -190,9 +191,10 @@ def main():
         pygame.draw.polygon(screen, (80, 170, 255), [p1, p2, p3])
         for b in bots:
             pygame.draw.circle(screen, (255, 120, 120), (b.x - cam_x, b.y - cam_y), 10)
-        for i, b in enumerate(bots):
-            label = font.render(f"B{i+1}:{bot_progs[i].next_cp_index}", True, (255, 180, 180))
-            screen.blit(label, (b.x - cam_x + 12, b.y - cam_y - 12))
+        if DEBUG:
+            for i, b in enumerate(bots):
+                label = font.render(f"B{i+1}:{bot_progs[i].next_cp_index}", True, (255, 180, 180))
+                screen.blit(label, (b.x - cam_x + 12, b.y - cam_y - 12))
 
         racers = [
             RacerSnapshot("P", boat.x, boat.y, player_prog),
@@ -207,12 +209,15 @@ def main():
                 won = True
 
         pos_text = font.render(f"Position: {pos}/5", True, (230, 230, 230))
-        dbg = font.render(
-            f"player_cp={player_prog.next_cp_index} finished={player_prog.finished}",
-            True,
-            (230, 230, 230),
-        )
-        screen.blit(dbg, (20, 100))
+        screen.blit(pos_text, (1280 - pos_text.get_width() - 20, 20))
+
+        if DEBUG:
+            dbg = font.render(
+                f"player_cp={player_prog.next_cp_index} finished={player_prog.finished}",
+                True,
+                (230, 230, 230),
+            )
+            screen.blit(dbg, (20, 100))
 
         screen.blit(pos_text, (1280 - pos_text.get_width() - 20, 20))
 
