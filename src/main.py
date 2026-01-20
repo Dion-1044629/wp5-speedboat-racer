@@ -1,12 +1,14 @@
 import pygame
-DEBUG = False
 import math
-from bot_ai import bot_decide
-from track import Checkpoint, Track, RacerProgress, update_progress
-from ranking import RacerSnapshot, position_of
-from timer import CountdownTimer
-from boat import Boat
-from boat_input import BoatInputState, update_input
+
+DEBUG = False
+
+from src.bot_ai import bot_decide
+from src.track import Checkpoint, Track, RacerProgress, update_progress
+from src.ranking import RacerSnapshot, position_of
+from src.timer import CountdownTimer
+from src.boat import Boat
+from src.boat_input import BoatInputState, update_input
 
 def separate_bots(bots, min_dist: float = 28.0, strength: float = 0.5):
     """
@@ -60,6 +62,8 @@ def main():
         Boat(x=720, y=360),
     ]
 
+    finish_times = {"P": None, "B1": None, "B2": None, "B3": None, "B4": None}
+
     for i in range(4):
         update_progress(track, bot_progs[i], bots[i].x, bots[i].y)
 
@@ -107,6 +111,9 @@ def main():
 
             update_progress(track, player_prog, boat.x, boat.y)
 
+            if player_prog.finished and finish_times["P"] is None:
+                finish_times["P"] = race_timer.total_seconds - race_timer.remaining
+
             # Update bot boats using simple AI
             for i in range(4):
                 d = bot_decide(track, bot_progs[i], bots[i].x, bots[i].y, bots[i].angle, bots[i].speed)
@@ -121,6 +128,10 @@ def main():
                 bots[i].y = max(0, min(WORLD_H, bots[i].y))
 
                 update_progress(track, bot_progs[i], bots[i].x, bots[i].y)
+                bot_id = f"B{i+1}"
+                if bot_progs[i].finished and finish_times[bot_id] is None:
+                    finish_times[bot_id] = race_timer.total_seconds - race_timer.remaining
+
 
             separate_bots(bots)
 
@@ -150,6 +161,7 @@ def main():
                 boat.speed = 0.0
                 input_state = BoatInputState()
                 race_timer = CountdownTimer(total_seconds=120)
+                finish_times = {"P": None, "B1": None, "B2": None, "B3": None, "B4": None}
                 game_over = False
                 won = False
 
@@ -197,10 +209,11 @@ def main():
                 screen.blit(label, (b.x - cam_x + 12, b.y - cam_y - 12))
 
         racers = [
-            RacerSnapshot("P", boat.x, boat.y, player_prog),
+            RacerSnapshot("P", boat.x, boat.y, player_prog, finish_times["P"]),
         ]
         for i in range(4):
-            racers.append(RacerSnapshot(f"B{i+1}", bots[i].x, bots[i].y, bot_progs[i]))
+            bot_id = f"B{i+1}"
+            racers.append(RacerSnapshot(bot_id, bots[i].x, bots[i].y, bot_progs[i], finish_times[bot_id]))
 
         pos = position_of(track, racers, "P")
 
