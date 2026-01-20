@@ -2,7 +2,9 @@
 
 ## Sprint 1 (datum: 15-01-2026 t/m 17-01-2026)
 
-![Sprint 1 planning](screenshots/sprint1.png)
+## Bewijs
+
+![Sprint 1 bewijs](screenshots/sprint1.png)
 
 **Doel:** project opzetten + basis gameplay loop + input + tests  
 **Backlog (kort):**
@@ -15,7 +17,9 @@
 
 ## Sprint 2 (datum: 18-01-2026 t/m 20-01-2026)
 
-![Sprint 2 planning](screenshots/sprint2.png)
+## Bewijs
+
+![Sprint 2 bewijs](screenshots/sprint2.png)
 
 **Doel:** track + ranking + bots + win-conditie + bugfixes  
 **Backlog (kort):**
