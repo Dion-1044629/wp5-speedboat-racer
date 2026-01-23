@@ -2,15 +2,20 @@
 
 ## Doel
 
-Top-down racing game (“Speedboat Racer”) met timer, positie-indicator en 4 AI-tegenstanders.
+Top-down racing game (“Speedboat Racer”) met:
+
+- Timer linksboven (countdown)
+- Positie rechtsboven als 1e/2e/3e/4e/5e
+- 4 AI-tegenstanders
+
+Bij time-out (zonder finish) verschijnt: "Game over, dude".
 
 ## Controls
 
 - Gas: W / ↑
 - Rem: S / ↓
 - Sturen: A / D of ← / →
-- (Optioneel) Handrem: Space
-- (Optioneel) Reset: R
+- Restart game: R
 
 ## Installatie & Run (Python + Pygame)
 
@@ -27,7 +32,7 @@ Top-down racing game (“Speedboat Racer”) met timer, positie-indicator en 4 A
 
 ### 3) Run
 
-- `python src/main.py`
+- `py -m src.main`
 
 ## Demo video
 

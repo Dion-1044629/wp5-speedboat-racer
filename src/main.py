@@ -33,6 +33,14 @@ def separate_bots(bots, min_dist: float = 28.0, strength: float = 0.5):
 
 def main():
     pygame.init()
+    pygame.mixer.init()
+
+    SFX_START = pygame.mixer.Sound("assets/sfx/start.wav")
+    SFX_END   = pygame.mixer.Sound("assets/sfx/end.wav")
+
+    SFX_START.set_volume(0.25) 
+    SFX_END.set_volume(0.35)
+
     screen = pygame.display.set_mode((1280, 720))
     WORLD_W, WORLD_H = 4000, 3000
     pygame.display.set_caption("WP5 Speedboat Racer")
@@ -69,20 +77,43 @@ def main():
 
     game_over = False
     won = False
+
+    end_sfx_played = False
+
+    # START COUNTDOWN (Stap 3)
+    START_COUNTDOWN = 3.0
+    start_countdown = START_COUNTDOWN
+    race_started = False
+
     running = True
     while running:
         dt = clock.tick(60) / 1000.0  # seconds
-        race_timer.update(dt)
-        if race_timer.is_done and (not won):
-            game_over = True
-
+        # Timer loopt pas nadat de race is gestart
+        if race_started and (not game_over) and (not won):
+            race_timer.update(dt)
+            if race_timer.is_done and (not won):
+                game_over = True
+                if not end_sfx_played:
+                    SFX_END.play()
+                    end_sfx_played = True
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
         keys = pygame.key.get_pressed()
+        if keys[pygame.K_ESCAPE]:
+            running = False
 
-        if (not game_over) and (not won):
+
+        # Countdown logica: 3-2-1-GO
+        if (not race_started) and (not game_over) and (not won):
+            start_countdown -= dt
+            if start_countdown <= -0.5:
+                race_started = True
+                SFX_START.play()
+
+
+        if (not game_over) and (not won) and race_started:
             gas = keys[pygame.K_w] or keys[pygame.K_UP]
             brk = keys[pygame.K_s] or keys[pygame.K_DOWN]
             left = keys[pygame.K_a] or keys[pygame.K_LEFT]
@@ -95,8 +126,8 @@ def main():
                 left=bool(left),
                 right=bool(right),
                 dt=dt,
-                steer_rate=2.2,   # lager = soepeler sturen
-                return_rate=4.0,  # lager = minder “snap” terug naar midden
+                steer_rate=2.2,   
+                return_rate=4.0,  
             )
 
             boat.update(
@@ -140,8 +171,6 @@ def main():
                 b.y = max(0, min(WORLD_H, b.y))          
 
         else:
-            if keys[pygame.K_ESCAPE]:
-                running = False
             if keys[pygame.K_r]:
                 bots = [
                     Boat(x=660, y=360),
@@ -164,6 +193,10 @@ def main():
                 finish_times = {"P": None, "B1": None, "B2": None, "B3": None, "B4": None}
                 game_over = False
                 won = False
+                end_sfx_played = False 
+
+                start_countdown = START_COUNTDOWN
+                race_started = False
 
         screen.fill((20, 20, 25))
         timer_text = font.render(f"Time: {race_timer.as_text()}", True, (230, 230, 230))
@@ -187,9 +220,10 @@ def main():
             if 0 <= sy <= 720:
                 pygame.draw.line(screen, (35, 35, 45), (-cam_x, sy), (WORLD_W - cam_x, sy))
 
-        debug = f"world=({boat.x:.0f},{boat.y:.0f}) speed={boat.speed:.0f} throttle={input_state.throttle:.2f} steer={input_state.steer:.2f}"
-        text = font.render(debug, True, (230, 230, 230))
-        screen.blit(text, (20, 20))
+        if DEBUG:
+            debug = f"world=({boat.x:.0f},{boat.y:.0f}) speed=... throttle={input_state.throttle:.2f} steer={input_state.steer:.2f}"
+            text = font.render(debug, True, (230, 230, 230))
+            screen.blit(text, (20, 20))
 
         # Draw boat as a rotated triangle
         cx, cy = boat.x - cam_x, boat.y - cam_y
@@ -220,9 +254,30 @@ def main():
         if (not game_over) and (not won):
             if player_prog.finished and pos == 1 and (not race_timer.is_done):
                 won = True
+                if not end_sfx_played:
+                    SFX_END.play()
+                    end_sfx_played = True
 
-        pos_text = font.render(f"Position: {pos}/5", True, (230, 230, 230))
+        pos_label = f"{pos}e"
+
+        pos_text = font.render(f"Positie: {pos_label}", True, (230, 230, 230))
         screen.blit(pos_text, (1280 - pos_text.get_width() - 20, 20))
+
+        # Toon startcountdown in het midden van het scherm
+        if (not race_started) and (not game_over) and (not won):
+            if start_countdown > 2:
+                txt = "3"
+            elif start_countdown > 1:
+                txt = "2"
+            elif start_countdown > 0:
+                txt = "1"
+            else:
+                txt = "GO!"
+
+            big_font = pygame.font.SysFont(None, 96)
+            t = big_font.render(txt, True, (255, 255, 255))
+            screen.blit(t, ((1280 - t.get_width()) // 2, (720 - t.get_height()) // 2))
+
 
         if DEBUG:
             dbg = font.render(
@@ -232,15 +287,13 @@ def main():
             )
             screen.blit(dbg, (20, 100))
 
-        screen.blit(pos_text, (1280 - pos_text.get_width() - 20, 20))
-
         if game_over:
             overlay = pygame.Surface((1280, 720), pygame.SRCALPHA)
             overlay.fill((0, 0, 0, 160))
             screen.blit(overlay, (0, 0))
 
             big = pygame.font.SysFont(None, 72)
-            msg = big.render("GAME OVER", True, (255, 255, 255))
+            msg = big.render("Game over, dude", True, (255, 255, 255))
             sub = font.render("Press R to restart or ESC to quit", True, (230, 230, 230))
             screen.blit(msg, (1280/2 - msg.get_width()/2, 720/2 - 60))
             screen.blit(sub, (1280/2 - sub.get_width()/2, 720/2 + 10))
