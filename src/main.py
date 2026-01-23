@@ -35,6 +35,11 @@ def main():
     pygame.init()
     pygame.mixer.init()
 
+    def dist2(ax, ay, bx, by):
+        dx = ax - bx
+        dy = ay - by
+        return dx*dx + dy*dy
+
     SFX_START = pygame.mixer.Sound("assets/sfx/start.wav")
     SFX_END   = pygame.mixer.Sound("assets/sfx/end.wav")
 
@@ -50,6 +55,20 @@ def main():
     input_state = BoatInputState()
     boat = Boat(x=640, y=360)
     race_timer = CountdownTimer(total_seconds=120)
+
+    BASE_PLAYER_MAX_SPEED = boat.max_speed
+    BOOST_FACTOR = 1.35        
+    BOOST_DURATION = 2.0       
+    boost_time_left = 0.0
+
+    PICKUP_RADIUS = 14
+    BOAT_RADIUS = 18
+
+    boost_pickups = [
+        (1400, 600),
+        (900, 1500),
+        (640, 2000),
+    ]
 
     track = Track([
         Checkpoint(640, 360, 80),     
@@ -130,6 +149,12 @@ def main():
                 return_rate=4.0,  
             )
 
+            if boost_time_left > 0:
+                boost_time_left -= dt
+                boat.max_speed = BASE_PLAYER_MAX_SPEED * BOOST_FACTOR
+            else:
+                boat.max_speed = BASE_PLAYER_MAX_SPEED
+
             boat.update(
                 throttle=input_state.throttle,
                 brake=input_state.brake,
@@ -139,6 +164,19 @@ def main():
 
             boat.x = max(0, min(WORLD_W, boat.x))
             boat.y = max(0, min(WORLD_H, boat.y))
+
+            if boost_pickups:
+                hit_index = None
+                hit_r2 = (BOAT_RADIUS + PICKUP_RADIUS) ** 2
+                for idx, (px, py) in enumerate(boost_pickups):
+                    if dist2(boat.x, boat.y, px, py) <= hit_r2:
+                        hit_index = idx
+                        break
+
+                if hit_index is not None:
+                    boost_time_left = BOOST_DURATION
+                    # verwijder pickup (eenmalig)
+                    boost_pickups.pop(hit_index)
 
             update_progress(track, player_prog, boat.x, boat.y)
 
@@ -198,6 +236,16 @@ def main():
                 start_countdown = START_COUNTDOWN
                 race_started = False
 
+                boost_time_left = 0.0
+                boat.max_speed = BASE_PLAYER_MAX_SPEED
+
+                # pickups opnieuw zetten bij restart
+                boost_pickups = [
+                    (1400, 600),
+                    (900, 1500),
+                    (640, 2000),
+                ]
+
         screen.fill((20, 20, 25))
         timer_text = font.render(f"Time: {race_timer.as_text()}", True, (230, 230, 230))
         screen.blit(timer_text, (20, 50))
@@ -219,6 +267,10 @@ def main():
             sy = y - cam_y
             if 0 <= sy <= 720:
                 pygame.draw.line(screen, (35, 35, 45), (-cam_x, sy), (WORLD_W - cam_x, sy))
+        
+        for (px, py) in boost_pickups:
+            pygame.draw.circle(screen, (0, 200, 255), (px - cam_x, py - cam_y), PICKUP_RADIUS)
+            pygame.draw.circle(screen, (255, 255, 255), (px - cam_x, py - cam_y), PICKUP_RADIUS, 2)
 
         if DEBUG:
             debug = f"world=({boat.x:.0f},{boat.y:.0f}) speed=... throttle={input_state.throttle:.2f} steer={input_state.steer:.2f}"
@@ -262,6 +314,10 @@ def main():
 
         pos_text = font.render(f"Positie: {pos_label}", True, (230, 230, 230))
         screen.blit(pos_text, (1280 - pos_text.get_width() - 20, 20))
+
+        if boost_time_left > 0:
+            boost_text = font.render("BOOST!", True, (0, 200, 255))
+            screen.blit(boost_text, (1280 - boost_text.get_width() - 20, 50))
 
         # Toon startcountdown in het midden van het scherm
         if (not race_started) and (not game_over) and (not won):

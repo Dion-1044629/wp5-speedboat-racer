@@ -10,6 +10,10 @@ Top-down racing game (“Speedboat Racer”) met:
 
 Bij time-out (zonder finish) verschijnt: "Game over, dude".
 
+## Innovatie
+
+Boost pickups: verzamel blauwe pickups op de map om ~2 seconden 35% sneller te varen. Tijdens de boost verschijnt “BOOST!” in de HUD.
+
 ## Controls
 
 - Gas: W / ↑
