@@ -40,4 +40,13 @@ Boost pickups: verzamel blauwe pickups op de map om ~2 seconden 35% sneller te v
 
 ## Demo video
 
-Link: https://drive.google.com/file/d/1kTXFkInthV7P9WkLt-vGhdTKhLZWC0Rh/view?usp=sharing
+[Google Drive demo video](https://drive.google.com/file/d/1kTXFkInthV7P9WkLt-vGhdTKhLZWC0Rh/view?usp=sharing)
+
+**Checklist in demo:**
+
+- Startmoment: 3–2–1–GO! (geen beweging vóór GO)
+- HUD: timer linksboven + positie rechtsboven (1e/2e/…)
+- Innovatie: boost pickup → “BOOST!” + tijdelijk sneller
+- Einde: “Game over, dude” bij time-out (en/of win bij finish als #1)
+- Run: `py -m src.main` • Tests: `py -m pytest`
+- Geluid: start-geluid bij GO en eind-geluid bij win/game over.”
