@@ -40,7 +40,7 @@ Boost pickups: verzamel blauwe pickups op de map om ~2 seconden 35% sneller te v
 
 ## Demo video
 
-[Google Drive demo video](https://drive.google.com/file/d/1kTXFkInthV7P9WkLt-vGhdTKhLZWC0Rh/view?usp=sharing)
+[Google Drive demo video](https://drive.google.com/file/d/1sffeVxD6aQyI2ZebcUqHxSKkH7J5bsp5/view?usp=sharing)
 
 **Checklist in demo:**
 
